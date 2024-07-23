@@ -30,6 +30,8 @@ public class TraditionalWebController {
 
         //The data will be printed only after all products are collected
         //even if request cancels, the data will be collected
+
+        //each time when browser will be refreshed NEW request will be sent!
         log.info("Products: {}", products);
         return products;
     }

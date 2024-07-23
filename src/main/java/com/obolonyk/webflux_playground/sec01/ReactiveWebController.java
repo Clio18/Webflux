@@ -2,6 +2,7 @@ package com.obolonyk.webflux_playground.sec01;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +26,20 @@ public class ReactiveWebController {
                 .uri("/demo01/products")
                 .retrieve()
                 .bodyToFlux(Product.class)
-                //will be immediately printed
                 // -N flag turn off the buffering and when request terminates the data will be stop collecting
+
+                //if the page refreshes, the request will be STOPs and sent again
                         .doOnNext(product -> log.info("Product: {}", product));
+    }
+
+
+    // will be showing product by product without waiting for all products to be collected
+    @GetMapping(value = "/products/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Product> getProductsStream() {
+        return this.webClient.get()
+                .uri("/demo01/products")
+                .retrieve()
+                .bodyToFlux(Product.class)
+                .doOnNext(product -> log.info("Product: {}", product));
     }
 }
