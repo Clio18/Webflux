@@ -100,5 +100,4 @@ public class Lec02CustomerRepositoryTest extends AbstractTest {
                 .verify();
     }
 
-
 }
