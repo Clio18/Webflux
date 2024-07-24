@@ -3,6 +3,7 @@ package com.obolonyk.webflux_playground.sec03.comtroller;
 import com.obolonyk.webflux_playground.sec03.dto.CustomerDto;
 import com.obolonyk.webflux_playground.sec03.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +28,12 @@ public class CustomerController {
     }
 
     @GetMapping("{id}")
-    public Mono<CustomerDto> getCustomerById(@PathVariable Integer id) {
-        return customerService.getCustomerById(id);
+    // here we can return ResponseEntity<Mono<CustomerDto>> but in this case header and body will be expected immediately
+    // in this case all return in async way
+    public Mono<ResponseEntity<CustomerDto>> getCustomerById(@PathVariable Integer id) {
+        return customerService.getCustomerById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -37,8 +42,10 @@ public class CustomerController {
     }
 
     @PutMapping("{id}")
-    public Mono<CustomerDto> updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono) {
-        return customerService.updateCustomer(id, mono);
+    public Mono<ResponseEntity<CustomerDto>>  updateCustomer(@PathVariable Integer id, @RequestBody Mono<CustomerDto> mono) {
+        return customerService.updateCustomer(id, mono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{id}")
