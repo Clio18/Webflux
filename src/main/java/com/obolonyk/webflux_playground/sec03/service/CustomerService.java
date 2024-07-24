@@ -4,6 +4,7 @@ import com.obolonyk.webflux_playground.sec03.dto.CustomerDto;
 import com.obolonyk.webflux_playground.sec03.mapper.EntityDtoMapper;
 import com.obolonyk.webflux_playground.sec03.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -12,6 +13,11 @@ import reactor.core.publisher.Mono;
 public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
+
+    public Flux<CustomerDto> getAllPageable(Integer page, Integer size){
+        return customerRepository.findAllBy(PageRequest.of(page-1, size))
+                .map(EntityDtoMapper::entityToDto);
+    }
 
     public Flux<CustomerDto> getAllCustomers() {
         return customerRepository.findAll()

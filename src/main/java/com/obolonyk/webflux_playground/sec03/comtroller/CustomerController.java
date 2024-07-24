@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -27,6 +29,14 @@ public class CustomerController {
     @GetMapping
     public Flux<CustomerDto> getAllCustomers() {
         return customerService.getAllCustomers();
+    }
+
+    @GetMapping("paginated")
+    public Mono<List<CustomerDto>> getAllCustomersPaginated(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "3") Integer size){
+        return customerService.getAllPageable(page, size)
+                .collectList();
     }
 
     @GetMapping("{id}")
