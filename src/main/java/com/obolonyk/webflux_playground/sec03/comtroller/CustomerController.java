@@ -49,6 +49,8 @@ public class CustomerController {
     }
 
     @DeleteMapping("{id}")
+    // we cannot add ResponseEntity here cause return type is void in any cases
+    // we should work with @Modifying annotation in repository
     public Mono<Void> deleteCustomer(@PathVariable Integer id) {
         return customerService.deleteCustomer(id);
     }
