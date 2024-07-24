@@ -3,7 +3,7 @@ package com.obolonyk.webflux_playground.sec02.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("customers")
+@Table("customer")
 public class Customer {
     @Id
     private Integer id;
@@ -32,5 +32,14 @@ public class Customer {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }
