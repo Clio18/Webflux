@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping("customers")
 public class CustomerController {
@@ -49,11 +51,10 @@ public class CustomerController {
     }
 
     @DeleteMapping("{id}")
-    // we cannot add ResponseEntity here cause return type is void in any cases
-    // we should work with @Modifying annotation in repository
-    public Mono<Void> deleteCustomer(@PathVariable Integer id) {
-        return customerService.deleteCustomer(id);
+    public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Integer id) {
+        return customerService.deleteCustomer(id)
+                .filter(b -> Objects.equals(true, b))
+                .map(b -> ResponseEntity.ok().<Void>build())
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-
 }
