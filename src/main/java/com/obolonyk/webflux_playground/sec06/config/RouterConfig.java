@@ -12,38 +12,21 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @Configuration
 public class RouterConfig {
     @Autowired
-    private CustomerRequestHandler customerRequestHandler;
+    private CustomerRequestHandler handler;
     @Autowired
     private ApplicationExceptionHandler exceptionHandler;
 
     @Bean
     public RouterFunction<ServerResponse> customerRoutes() {
         return RouterFunctions.route()
-                .path("customers", this::customerRoutes2)
-                .POST("/customers", customerRequestHandler::saveCustomer)
-                .PUT("/customers/{id}", customerRequestHandler::updateCustomer)
-                .DELETE("/customers/{id}", customerRequestHandler::deleteCustomer)
+                .GET("/customers", handler::allCustomers)
+                .GET("/customers/{id}", handler::getCustomerById)
+                .GET("/customers/paginated", handler::allCustomersPageable)
+                .POST("/customers", handler::saveCustomer)
+                .PUT("/customers/{id}", handler::updateCustomer)
+                .DELETE("/customers/{id}", handler::deleteCustomer)
                 .onError(CustomerNotFoundException.class, exceptionHandler::handleException)
                 .onError(InvalidInputException.class, exceptionHandler::handleException)
-
-                //webFilter implementation
-//                .filter((request, next) -> {
-//                    return ServerResponse.badRequest().build();
-//                })
-//                .filter((request, next) -> {
-//                    return ServerResponse.badRequest().build();
-//                })
-
-                .build();
-    }
-
-
-    private RouterFunction<ServerResponse> customerRoutes2() {
-        return RouterFunctions.route()
-                .GET("/paginated", customerRequestHandler::allCustomersPageable)
-                .GET("/{id}", customerRequestHandler::getCustomerById)
-                //the order of routes matters!!
-                .GET(customerRequestHandler::allCustomers)
                 .build();
     }
 }
