@@ -17,10 +17,14 @@ public class RouterConfig {
     private ApplicationExceptionHandler exceptionHandler;
     @Bean
     public RouterFunction<ServerResponse> customerRoutes(){
+
+        //the order of routes matters, for example path "/customers/pageable" is the same as "/customers/{id}"
         return RouterFunctions.route()
                 .GET("/customers", customerRequestHandler::allCustomers)
-                .GET("/customers/pageable", customerRequestHandler::allCustomersPageable)
+
+                .GET("/customers/paginated", customerRequestHandler::allCustomersPageable)
                 .GET("/customers/{id}", customerRequestHandler::getCustomerById)
+
                 .POST("/customers", customerRequestHandler::saveCustomer)
                 .PUT("/customers/{id}", customerRequestHandler::updateCustomer)
                 .DELETE("/customers/{id}", customerRequestHandler::deleteCustomer)
