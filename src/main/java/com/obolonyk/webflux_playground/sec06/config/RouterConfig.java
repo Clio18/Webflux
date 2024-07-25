@@ -15,25 +15,26 @@ public class RouterConfig {
     private CustomerRequestHandler customerRequestHandler;
     @Autowired
     private ApplicationExceptionHandler exceptionHandler;
-    @Bean
-    public RouterFunction<ServerResponse> customerRoutes1(){
-        //the order of routes matters, for example path "/customers/pageable" is the same as "/customers/{id}"
-        return RouterFunctions.route()
-                .GET("/customers", customerRequestHandler::allCustomers)
-                .GET("/customers/paginated", customerRequestHandler::allCustomersPageable)
-                .GET("/customers/{id}", customerRequestHandler::getCustomerById)
-                .build();
-    }
 
     @Bean
-    public RouterFunction<ServerResponse> customerRoutes2(){
-        //the order of routes matters, for example path "/customers/pageable" is the same as "/customers/{id}"
+    public RouterFunction<ServerResponse> customerRoutes() {
         return RouterFunctions.route()
+                .path("customers", this::customerRoutes2)
                 .POST("/customers", customerRequestHandler::saveCustomer)
                 .PUT("/customers/{id}", customerRequestHandler::updateCustomer)
                 .DELETE("/customers/{id}", customerRequestHandler::deleteCustomer)
                 .onError(CustomerNotFoundException.class, exceptionHandler::handleException)
                 .onError(InvalidInputException.class, exceptionHandler::handleException)
+                .build();
+    }
+
+
+    private RouterFunction<ServerResponse> customerRoutes2() {
+        return RouterFunctions.route()
+                .GET("/paginated", customerRequestHandler::allCustomersPageable)
+                .GET("/{id}", customerRequestHandler::getCustomerById)
+                //the order of routes matters!!
+                .GET(customerRequestHandler::allCustomers)
                 .build();
     }
 }
