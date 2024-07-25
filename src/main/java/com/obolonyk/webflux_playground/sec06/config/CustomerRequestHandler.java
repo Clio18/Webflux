@@ -22,6 +22,14 @@ public class CustomerRequestHandler {
                 .as(flux -> ServerResponse.ok().body(flux, Customer.class));
     }
 
+    public Mono<ServerResponse> allCustomersPageable(ServerRequest request) {
+        var page = request.queryParam("page").map(Integer::valueOf).orElse(1);
+        var size = request.queryParam("size").map(Integer::valueOf).orElse(3);
+        return service.getAllPageable(page, size)
+                .collectList()
+                .flatMap(ServerResponse.ok()::bodyValue);
+    }
+
     public Mono<ServerResponse> getCustomerById(ServerRequest request) {
         Integer id = Integer.valueOf(request.pathVariable("id"));
         return service.getCustomerById(id)
