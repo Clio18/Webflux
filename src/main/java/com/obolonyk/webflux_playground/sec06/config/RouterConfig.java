@@ -25,6 +25,15 @@ public class RouterConfig {
                 .DELETE("/customers/{id}", customerRequestHandler::deleteCustomer)
                 .onError(CustomerNotFoundException.class, exceptionHandler::handleException)
                 .onError(InvalidInputException.class, exceptionHandler::handleException)
+
+                //webFilter implementation
+//                .filter((request, next) -> {
+//                    return ServerResponse.badRequest().build();
+//                })
+//                .filter((request, next) -> {
+//                    return ServerResponse.badRequest().build();
+//                })
+
                 .build();
     }
 
