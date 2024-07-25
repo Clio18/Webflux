@@ -13,31 +13,39 @@ import java.util.function.BiFunction;
 
 @Configuration
 public class Calculator {
+
     @Bean
     public RouterFunction<ServerResponse> calculatorRoutes() {
         return RouterFunctions.route()
-                .GET("/calculator/{a}/{b}", isOperator("+"), handle(Integer::sum))
-                .GET("/calculator/{a}/{b}", isOperator("-"), handle((a, b) -> a-b))
-                .GET("/calculator/{a}/{b}", isOperator("*"), handle((a, b) -> a*b))
-                .GET("/calculator/{a}/{b}", isOperator("/"), handle((a, b) -> a/b))
-                .GET("/calculator/{a}/{b}", handle("Operator not supported. It should be like: + - * /"))
-                .GET("/calculator/{a}/0", isOperator("/"), handle("Division by zero is not allowed"))
+                .path("/calculator", this::routes)
+                .build();
+    }
+
+    private RouterFunction<ServerResponse> routes() {
+        return RouterFunctions.route()
+                .GET("/{a}/{b}", isOperator("+"), handle(Integer::sum))
+                .GET("/{a}/{b}", isOperator("-"), handle((a, b) -> a-b))
+                .GET("/{a}/{b}", isOperator("*"), handle((a, b) -> a*b))
+                .GET("/{a}/{b}", isOperator("/"), handle((a, b) -> a/b))
+                .GET("/{a}/{b}", badRequest("Operator not supported. It should be like: + - * /"))
+                .GET("/{a}/0", isOperator("/"), badRequest("Division by zero is not allowed"))
                 .build();
     }
 
     private RequestPredicate isOperator(String operator) {
-        return RequestPredicates.headers(headers -> headers.header("operator").getFirst().equals(operator));
+        return RequestPredicates.headers(h -> operator.equals(h.firstHeader("operator")));
     }
 
     private HandlerFunction<ServerResponse> handle(BiFunction<Integer, Integer, Integer> func) {
         return req -> {
-            int a = Integer.parseInt(req.pathVariable("a"));
-            int b = Integer.parseInt(req.pathVariable("b"));
-            return ServerResponse.ok().bodyValue(func.apply(a, b));
+            var a = Integer.parseInt(req.pathVariable("a"));
+            var b = Integer.parseInt(req.pathVariable("b"));
+            var result = func.apply(a, b);
+            return ServerResponse.ok().bodyValue(result);
         };
     }
 
-    private HandlerFunction<ServerResponse> handle(String message) {
+    private HandlerFunction<ServerResponse> badRequest(String message){
         return req -> ServerResponse.badRequest().bodyValue(message);
     }
 }
