@@ -12,7 +12,10 @@ import java.util.UUID;
 
 public class Lec09ExchangeFilter extends AbstractWebclient {
     public static final Logger log = LoggerFactory.getLogger(Lec09ExchangeFilter.class);
-    private final WebClient webClient = createWebClient(b-> b.filter(tokenGeneration()));
+    private final WebClient webClient = createWebClient(
+            b->
+                    b.filter(tokenGeneration())
+                            .filter(logHttpReq()));
 
     @Test
     void exchangeFilter() {
@@ -39,6 +42,13 @@ public class Lec09ExchangeFilter extends AbstractWebclient {
                     .headers(h -> h.setBearerAuth(token))
                     .build();
             return next.exchange(newRequest);
+        };
+    }
+
+    private ExchangeFilterFunction logHttpReq() {
+        return (req, next) -> {
+            log.info("Logg info: {} {}", req.method(), req.url());
+            return next.exchange(req);
         };
     }
 
