@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Lec09ExchangeFilter extends AbstractWebclient {
     public static final Logger log = LoggerFactory.getLogger(Lec09ExchangeFilter.class);
     private final WebClient webClient = createWebClient(
-            b->
+            b ->
                     b.filter(tokenGeneration())
                             .filter(logHttpReq()));
 
@@ -21,6 +21,7 @@ public class Lec09ExchangeFilter extends AbstractWebclient {
     void exchangeFilter() {
         webClient.get()
                 .uri("/lec09/product/{id}", 1)
+                .attribute("enable-logging", true)
                 .retrieve()
                 .bodyToMono(ProductDto.class)
                 .doOnNext(print())
@@ -47,7 +48,10 @@ public class Lec09ExchangeFilter extends AbstractWebclient {
 
     private ExchangeFilterFunction logHttpReq() {
         return (req, next) -> {
-            log.info("Logg info: {} {}", req.method(), req.url());
+            var isEnable = (Boolean ) req.attributes().getOrDefault("enable-logging", false);
+            if (isEnable) {
+                log.info("Logg info: {} {}", req.method(), req.url());
+            }
             return next.exchange(req);
         };
     }
