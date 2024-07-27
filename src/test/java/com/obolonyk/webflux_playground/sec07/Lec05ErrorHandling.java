@@ -1,13 +1,16 @@
 package com.obolonyk.webflux_playground.sec07;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.test.StepVerifier;
 
 public class Lec05ErrorHandling extends AbstractWebclient{
     private final WebClient webClient = createWebClient(h -> h.defaultHeader("operation", "@"));
+    public static final Logger log = LoggerFactory.getLogger(Lec05ErrorHandling.class);
 
     @Test
     void handlingError() {
@@ -17,6 +20,11 @@ public class Lec05ErrorHandling extends AbstractWebclient{
                 .retrieve()
                 .bodyToMono(CalculatorResponse.class)
 
+
+                .doOnError(WebClientResponseException.class, ex-> {
+                    log.info("{}", ex.getResponseBodyAs(ProblemDetail.class));
+                })
+ 
                 //default value
                 //.onErrorReturn(new CalculatorResponse(0, 0, null, 0.0))
                 .onErrorReturn(
