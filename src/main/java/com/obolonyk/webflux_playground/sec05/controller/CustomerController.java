@@ -1,4 +1,4 @@
-package com.obolonyk.webflux_playground.sec05.comtroller;
+package com.obolonyk.webflux_playground.sec05.controller;
 
 import com.obolonyk.webflux_playground.sec05.dto.CustomerDto;
 import com.obolonyk.webflux_playground.sec05.exception.ApplicationException;

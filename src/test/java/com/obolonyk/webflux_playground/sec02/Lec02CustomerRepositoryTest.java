@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import reactor.test.StepVerifier;
 
 public class Lec02CustomerRepositoryTest extends AbstractTest {
-    public static final Logger log = LoggerFactory.getLogger(Lec02CustomerRepositoryTest.class);
+    public static final Logger log = LoggerFactory.getLogger(Lec02ProductRepositoryTest.class);
 
     @Autowired
     private CustomerRepository customerRepository;

@@ -37,7 +37,7 @@ public class CustomerService {
 
     public Mono<CustomerDto> updateCustomer(Integer id, Mono<CustomerDto> mono) {
         return customerRepository.findById(id)
-                // mono is Mono<CustomerDto>, so in case of map it will be Mono<Mono<CustomerDto>>, that why to inline
+                // mono is Mono<ProductDto>, so in case of map it will be Mono<Mono<ProductDto>>, that why to inline
                 // that why to inline use flatMap
                 .flatMap(c -> mono)
                 .map(EntityDtoMapper::dtoToEntity)

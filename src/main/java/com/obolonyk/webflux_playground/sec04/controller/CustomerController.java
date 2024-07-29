@@ -1,11 +1,10 @@
-package com.obolonyk.webflux_playground.sec04.comtroller;
+package com.obolonyk.webflux_playground.sec04.controller;
 
 import com.obolonyk.webflux_playground.sec04.dto.CustomerDto;
 import com.obolonyk.webflux_playground.sec04.exception.ApplicationException;
 import com.obolonyk.webflux_playground.sec04.service.CustomerService;
 import com.obolonyk.webflux_playground.sec04.validator.RequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

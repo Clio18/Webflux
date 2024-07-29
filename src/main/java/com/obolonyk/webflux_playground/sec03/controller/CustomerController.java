@@ -1,4 +1,4 @@
-package com.obolonyk.webflux_playground.sec03.comtroller;
+package com.obolonyk.webflux_playground.sec03.controller;
 
 import com.obolonyk.webflux_playground.sec03.dto.CustomerDto;
 import com.obolonyk.webflux_playground.sec03.service.CustomerService;
@@ -40,7 +40,7 @@ public class CustomerController {
     }
 
     @GetMapping("{id}")
-    // here we can return ResponseEntity<Mono<CustomerDto>> but in this case header and body will be expected immediately
+    // here we can return ResponseEntity<Mono<ProductDto>> but in this case header and body will be expected immediately
     // in this case all return in async way
     public Mono<ResponseEntity<CustomerDto>> getCustomerById(@PathVariable Integer id) {
         return customerService.getCustomerById(id)
