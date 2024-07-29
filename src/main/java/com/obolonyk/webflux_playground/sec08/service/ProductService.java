@@ -23,4 +23,9 @@ public class ProductService {
          return productRepository.count();
     }
 
+    public Flux<ProductDto> findAll(){
+        return productRepository.findAll()
+                .map(EntityDtoMapper::entityToDto);
+    }
+
 }
