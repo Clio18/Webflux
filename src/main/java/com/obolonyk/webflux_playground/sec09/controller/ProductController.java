@@ -1,8 +1,8 @@
-package com.obolonyk.webflux_playground.sec08.controller;
+package com.obolonyk.webflux_playground.sec09.controller;
 
-import com.obolonyk.webflux_playground.sec08.dto.ProductDto;
-import com.obolonyk.webflux_playground.sec08.dto.UploadResponse;
-import com.obolonyk.webflux_playground.sec08.service.ProductService;
+import com.obolonyk.webflux_playground.sec09.dto.ProductDto;
+import com.obolonyk.webflux_playground.sec09.dto.UploadResponse;
+import com.obolonyk.webflux_playground.sec09.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,21 +25,17 @@ public class ProductController {
 
     public static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
-
     // MediaType.APPLICATION_NDJSON_VALUE -> service to service communication
     // MediaType.TEXT_EVENT_STREAM_VALUE -> to browser (their own specification)
-    @PostMapping(value = "upload", consumes = MediaType.APPLICATION_NDJSON_VALUE)
-    public Mono<UploadResponse> upload(@RequestBody Flux<ProductDto> flux){
-        log.info("invoked");
-        return productService.saveAll(
-                flux.doOnNext(dto -> log.info("received: {}", dto)))
-                .then(productService.getCount())
-                .map(count -> new UploadResponse(UUID.randomUUID(), count));
+
+    @PostMapping
+    public Mono<ProductDto> save(@RequestBody Mono<ProductDto> mono){
+        return productService.saveProduct(mono);
     }
 
-    @GetMapping(value = "download", produces = MediaType.APPLICATION_NDJSON_VALUE)
-    public Flux<ProductDto> upload(){
-        return productService.findAll();
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductDto> stream(){
+        return productService.productStream();
     }
 
 
