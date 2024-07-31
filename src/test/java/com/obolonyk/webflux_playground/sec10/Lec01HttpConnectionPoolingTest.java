@@ -18,7 +18,8 @@ public class Lec01HttpConnectionPoolingTest extends AbstractWebclient{
                 // for max = 260 - 10 sec, because flatMap has it own queue for 256 capacity
                 // to work in parallel way, so if max > 256 it creates 2 queues
 
-                .flatMap(this::getProduct)
+                //to resolve -> takes 5 sec
+                .flatMap(this::getProduct, max)
                 .collectList()
                 .as(StepVerifier::create)
                 .assertNext(list -> Assertions.assertEquals(max, list.size()))
