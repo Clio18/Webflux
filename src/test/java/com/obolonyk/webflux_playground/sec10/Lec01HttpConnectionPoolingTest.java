@@ -12,13 +12,11 @@ public class Lec01HttpConnectionPoolingTest extends AbstractWebclient{
 
     @Test
     void concurrentRequest() {
-        var max = 260;
+        var max = 501;
         Flux.range(1, max)
-                // for max = 250 - the execution takes 5 sec
-                // for max = 260 - 10 sec, because flatMap has it own queue for 256 capacity
-                // to work in parallel way, so if max > 256 it creates 2 queues
+                // for max = 500 - the execution takes 5 sec
+                // for max = 501 - 10 sec, because of the WebClent who can handle 500 requests by default
 
-                //to resolve -> takes 5 sec
                 .flatMap(this::getProduct, max)
                 .collectList()
                 .as(StepVerifier::create)
