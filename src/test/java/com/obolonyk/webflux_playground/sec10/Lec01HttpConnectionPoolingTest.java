@@ -7,24 +7,23 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
-
 public class Lec01HttpConnectionPoolingTest extends AbstractWebclient{
     private final WebClient client = createWebClient();
 
     @Test
-    void concurrentRequest() throws InterruptedException {
-        var max = 3;
+    void concurrentRequest() {
+        var max = 260;
         Flux.range(1, max)
+                // for max = 250 - the execution takes 5 sec
+                // for max = 260 - 10 sec, because flatMap has it own queue for 256 capacity
+                // to work in parallel way, so if max > 256 it creates 2 queues
+
                 .flatMap(this::getProduct)
                 .collectList()
                 .as(StepVerifier::create)
                 .assertNext(list -> Assertions.assertEquals(max, list.size()))
                 .expectComplete()
                 .verify();
-
-        // for each request it will create its own connection, so max connections will be created
-        Thread.sleep(Duration.ofMinutes(1));
     }
 
     private Mono<ProductDto> getProduct(Integer id){
