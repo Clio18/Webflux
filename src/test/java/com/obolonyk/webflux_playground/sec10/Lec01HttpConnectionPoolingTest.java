@@ -10,6 +10,8 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
 
+// if response time takes 100ms => 500/100ms => 5000 req per sec!
+
 public class Lec01HttpConnectionPoolingTest extends AbstractWebclient {
     private final WebClient client = createWebClient(b -> {
         var poolSize = 501;
