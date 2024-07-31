@@ -6,27 +6,25 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.HttpProtocol;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
 
-// if response time takes 100ms => 500/100ms => 5000 req per sec!
 
-public class Lec01HttpConnectionPoolingTest extends AbstractWebclient {
+public class Lec02Http2Test extends AbstractWebclient {
     private final WebClient client = createWebClient(b -> {
-        var poolSize = 501;
-        // var poolSize = 10000 -> SocketException
-        // any name
+        // for HTTP2 only one connection will be established,
+        // however we need to ensure the our Loadbalancer supports HTTP2!
+        var poolSize = 1;
         var provider = ConnectionProvider.builder("my")
-                // queue to reuse connection
                 .lifo()
                 .maxConnections(poolSize)
-                // the size of the queue where requests will be placed and wait for connection
-                .pendingAcquireMaxCount(poolSize * 5)
                 .build();
 
         var httpClient = HttpClient.create(provider)
-                // adjustment we need to add
+                // we have no security certificate so use H2C
+                .protocol(HttpProtocol.H2C)
                 .compress(true)
                 .keepAlive(true);
 
@@ -35,11 +33,8 @@ public class Lec01HttpConnectionPoolingTest extends AbstractWebclient {
 
     @Test
     void concurrentRequest() {
-        var max = 501;
+        var max = 10_000;
         Flux.range(1, max)
-                // for max = 500 - the execution takes 5 sec
-                // for max = 501 - 10 sec, because of the WebClent who can handle 500 requests by default
-
                 .flatMap(this::getProduct, max)
                 .collectList()
                 .as(StepVerifier::create)
