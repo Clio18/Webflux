@@ -31,20 +31,26 @@ public class TradeService {
     private Mono<StockTradeResponse> sell(Integer customerId, StockTradeRequest request) {
 
 
+        return null;
     }
 
     private Mono<StockTradeResponse> buyStock(Integer customerId, StockTradeRequest request) {
+        // find customer, if not -> exception
         var customerMono = customerRepository.findById(customerId)
                 .switchIfEmpty(ApplicationExceptionsFactory.notFound(customerId))
                 .filter(c -> c.getBalance() >= request.getTotalPrice())
                 .switchIfEmpty(ApplicationExceptionsFactory.insufficientBalance(customerId));
 
+        // check if customer has Ticker:
+        // if not -> create new portfolioItemMono
+        // if yes - get it
         var portfolioItemMono = portfolioItemRepository.findByCustomerIdAndTicker(customerId, request.ticker())
                 .defaultIfEmpty(EntityDtoMapper.toPortfolioItem(customerId, request.ticker()));
 
         // firstly subscribe to customerMono if its gives customer
         // then subscribe to portfolioItemMono
         // to create a Tuple -> contains both
+        // and do it in sequential manner, because we do not need to continue if we did not found customer
       return customerMono.zipWhen(customer -> portfolioItemMono)
               .flatMap(t -> executeBuy(t.getT1(), t.getT2(), request));
     }
