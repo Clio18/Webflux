@@ -21,17 +21,25 @@ public class TradeService {
     private final PortfolioItemRepository portfolioItemRepository;
 
     @Transactional
-    public Mono<StockTradeResponse> trade(Integer customerId, StockTradeRequest request){
-         return switch (request.action()) {
-             case BUY -> buyStock(customerId, request);
-             case SELL -> sell(customerId, request);
-         };
+    public Mono<StockTradeResponse> trade(Integer customerId, StockTradeRequest request) {
+        return switch (request.action()) {
+            case BUY -> buyStock(customerId, request);
+            case SELL -> sell(customerId, request);
+        };
     }
 
     private Mono<StockTradeResponse> sell(Integer customerId, StockTradeRequest request) {
+        var customerMono = customerRepository.findById(customerId)
+                .switchIfEmpty(ApplicationExceptionsFactory.notFound(customerId));
+
+        var portfolioItemMono = portfolioItemRepository.findByCustomerIdAndTicker(customerId, request.ticker())
+                .filter(p -> p.getQuantity() >= request.quantity())
+                .switchIfEmpty(ApplicationExceptionsFactory.insufficientShares(customerId));
 
 
-        return null;
+        return customerMono.zipWhen(customer -> portfolioItemMono)
+                .flatMap(t -> executeBuy(t.getT1(), t.getT2(), request));
+
     }
 
     private Mono<StockTradeResponse> buyStock(Integer customerId, StockTradeRequest request) {
@@ -51,16 +59,24 @@ public class TradeService {
         // then subscribe to portfolioItemMono
         // to create a Tuple -> contains both
         // and do it in sequential manner, because we do not need to continue if we did not found customer
-      return customerMono.zipWhen(customer -> portfolioItemMono)
-              .flatMap(t -> executeBuy(t.getT1(), t.getT2(), request));
+        return customerMono.zipWhen(customer -> portfolioItemMono)
+                .flatMap(t -> executeSell(t.getT1(), t.getT2(), request));
     }
 
-    private Mono<StockTradeResponse> executeBuy(Customer customer, PortfolioItem portfolioItem, StockTradeRequest request){
+    private Mono<StockTradeResponse> executeBuy(Customer customer, PortfolioItem portfolioItem, StockTradeRequest request) {
         customer.setBalance(customer.getBalance() - request.getTotalPrice());
         portfolioItem.setQuantity(portfolioItem.getQuantity() + request.quantity());
-        var response = EntityDtoMapper.toStockTradeResponse(request, customer.getId(), customer.getBalance());
+        return getStockTradeResponseMono(customer, portfolioItem, request);
+    }
 
-        //to save updated entities in parallel way
+    private Mono<StockTradeResponse> executeSell(Customer customer, PortfolioItem portfolioItem, StockTradeRequest request) {
+        customer.setBalance(customer.getBalance() + request.getTotalPrice());
+        portfolioItem.setQuantity(portfolioItem.getQuantity() - request.quantity());
+        return getStockTradeResponseMono(customer, portfolioItem, request);
+    }
+
+    private Mono<StockTradeResponse> getStockTradeResponseMono(Customer customer, PortfolioItem portfolioItem, StockTradeRequest request) {
+        var response = EntityDtoMapper.toStockTradeResponse(request, customer.getId(), customer.getBalance());
         return Mono.zip(customerRepository.save(customer), portfolioItemRepository.save(portfolioItem))
                 .thenReturn(response);
     }
